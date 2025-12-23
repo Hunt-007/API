@@ -1,23 +1,14 @@
 //auth.middleware.js
-const jwt = require('jsonwebtoken');
+const authorize = (requiredPermission) => {
+  return (req, res, next) => {
+    const permisos = req.user?.permisos;
 
-const authMiddleware = (req, res, next) => {
-  const token = req.cookies?.token;
-
-  if (!token) {
-    return res.status(401).json({ message: 'No autorizado' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);//verifica el token
-
-    // Guardamos el usuario decodificado en la request
-    req.user = decoded;
+    if (!permisos || !permisos.includes(requiredPermission)) {
+      return res.status(403).json({ message: 'Permiso denegado' });
+    }
 
     next();
-  } catch (error) {
-    return res.status(401).json({ message: 'Token inválido o expirado' });
-  }
+  };
 };
 
-module.exports = authMiddleware;
+module.exports = authorize;

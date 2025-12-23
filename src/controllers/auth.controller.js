@@ -33,17 +33,26 @@ const login = async (req, res) => {
   }
 
   // 3️⃣ Traer roles del usuario
-  const rolesResult = await sql.query`
+  /* const rolesResult = await sql.query`
     SELECT r.nombre
     FROM Usuario_Roles ur
     JOIN Roles r ON ur.rol_id = r.id
     WHERE ur.usuario_id = ${user.id}
   `;
 
-  const roles = rolesResult.recordset.map(r => r.nombre); // ["ADMIN"]
+  const roles = rolesResult.recordset.map(r => r.nombre); // ["ADMIN"] */
+  const permisosResult = await sql.query`
+  SELECT DISTINCT p.codigo
+  FROM Permisos p
+  INNER JOIN Rol_Permisos rp ON rp.permiso_id = p.id
+  INNER JOIN Usuario_Roles ur ON ur.rol_id = rp.rol_id
+  WHERE ur.usuario_id = ${user.id}
+`;
+
+const permisos = permisosResult.recordset.map(p => p.codigo);
 
   // 4️⃣ Generar JWT con roles
-  const token = jwt.sign(
+/*   const token = jwt.sign(
     {
       id: user.id,
       email: user.email,
@@ -51,7 +60,17 @@ const login = async (req, res) => {
     },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN }
-  );
+  ); */
+  const token = jwt.sign(
+  {
+    id: user.id,
+    email: user.email,
+    permisos
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: process.env.JWT_EXPIRES_IN }
+);
+
 
   // 5️⃣ Enviar cookie
   res.cookie('token', token, {

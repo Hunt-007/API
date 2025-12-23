@@ -6,6 +6,8 @@ const authRoutes = require('./routes/auth.routes');
 
 const protectedRoutes = require('./routes/protected.routes');
 
+const userRoutes = require('./routes/user.routes');
+
 const app = express();
 
 app.use(express.json());
@@ -17,5 +19,7 @@ app.use('/api', healthRoutes);
 app.use('/api', authRoutes);
 
 app.use('/api', protectedRoutes);
+
+app.use('/api', userRoutes);
 
 module.exports = app;
