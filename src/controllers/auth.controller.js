@@ -33,14 +33,7 @@ const login = async (req, res) => {
   }
 
   // 3️⃣ Traer roles del usuario
-  /* const rolesResult = await sql.query`
-    SELECT r.nombre
-    FROM Usuario_Roles ur
-    JOIN Roles r ON ur.rol_id = r.id
-    WHERE ur.usuario_id = ${user.id}
-  `;
 
-  const roles = rolesResult.recordset.map(r => r.nombre); // ["ADMIN"] */
   const permisosResult = await sql.query`
   SELECT DISTINCT p.codigo
   FROM Permisos p
@@ -51,16 +44,7 @@ const login = async (req, res) => {
 
 const permisos = permisosResult.recordset.map(p => p.codigo);
 
-  // 4️⃣ Generar JWT con roles
-/*   const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      roles
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
-  ); */
+  // 4️⃣ Generar JWT con permisos
   const token = jwt.sign(
   {
     id: user.id,
@@ -87,7 +71,7 @@ const permisos = permisosResult.recordset.map(p => p.codigo);
       id: user.id,
       nombre: user.nombre,
       email: user.email,
-      roles
+      permisos
     }
   });
 };

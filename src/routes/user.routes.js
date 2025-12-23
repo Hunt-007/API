@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { createUser } = require('../controllers/user.controller'); // controlador que crearás
-const authMiddleware = require('../middleware/auth.middleware'); // ya existente
-const authorize = require('../middleware/authorize.middleware'); // middleware nuevo
 
-// Ruta protegida solo para ADMIN
+const {
+  createUser,
+  updateUser,
+  deleteUser
+} = require('../controllers/user.controller');
 
+const authMiddleware = require('../middleware/auth.middleware');
+const authorize = require('../middleware/authorize.middleware');
+
+// CREAR usuario
 router.post(
   '/usuarios',
   authMiddleware,
@@ -13,6 +18,7 @@ router.post(
   createUser
 );
 
+// EDITAR usuario
 router.put(
   '/usuarios/:id',
   authMiddleware,
@@ -20,6 +26,7 @@ router.put(
   updateUser
 );
 
+// ELIMINAR usuario
 router.delete(
   '/usuarios/:id',
   authMiddleware,

@@ -1,30 +1,13 @@
 // src/middleware/authorize.middleware.js
-/* const authorize = (...allowedRoles) => {
+const authorize = (permisoRequerido) => {
   return (req, res, next) => {
-    const userRoles = req.user?.roles || []; // roles vienen del JWT
 
-    const hasRole = userRoles.some(role => allowedRoles.includes(role));
-
-    if (!hasRole) {
-      return res.status(403).json({ message: 'Acceso denegado' });
+    if (!req.user || !req.user.permisos) {
+      return res.status(403).json({ message: 'Permisos no encontrados' });
     }
 
-    next();
-  };
-};
-
-module.exports = authorize;
- */
-const authorize = (requiredRole) => {
-  return (req, res, next) => {
-    const user = req.user;
-
-    if (!user || !user.roles) {
+    if (!req.user.permisos.includes(permisoRequerido)) {
       return res.status(403).json({ message: 'Acceso denegado' });
-    }
-
-    if (!user.roles.includes(requiredRole)) {
-      return res.status(403).json({ message: 'Permisos insuficientes' });
     }
 
     next();

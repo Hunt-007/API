@@ -1,10 +1,18 @@
 //auth.middleware.js
-const authorize = (requiredPermission) => {
+const authorize = (...requiredPermissions) => {
   return (req, res, next) => {
-    const permisos = req.user?.permisos;
+    const userPermissions = req.user?.permisos;
 
-    if (!permisos || !permisos.includes(requiredPermission)) {
-      return res.status(403).json({ message: 'Permiso denegado' });
+    if (!userPermissions) {
+      return res.status(403).json({ message: 'Permisos no encontrados' });
+    }
+
+    const hasPermission = requiredPermissions.some(p =>
+      userPermissions.includes(p)
+    );
+
+    if (!hasPermission) {
+      return res.status(403).json({ message: 'Acceso denegado' });
     }
 
     next();
