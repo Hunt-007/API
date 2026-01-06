@@ -102,9 +102,10 @@ const deleteUser = async (req, res) => {
 
   res.json(result.recordset);
 }; */
+
 const listUsers = async (req, res) => {
+  // console.log('🚀 ENTRE A listUsers');
   try {
-    // Query params
     const {
       page = 1,
       limit = 10,
@@ -115,27 +116,23 @@ const listUsers = async (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    // Filtros dinámicos
+    // Query base
     let where = 'WHERE 1=1';
-    const params = [];
 
     if (nombre) {
-      where += ' AND nombre LIKE @nombre';
-      params.push({ name: 'nombre', value: `%${nombre}%` });
+      where += ` AND nombre LIKE '%${nombre}%'`;
     }
 
     if (email) {
-      where += ' AND email LIKE @email';
-      params.push({ name: 'email', value: `%${email}%` });
+      where += ` AND email LIKE '%${email}%'`;
     }
 
     if (activo !== undefined) {
-      where += ' AND activo = @activo';
-      params.push({ name: 'activo', value: Number(activo) });
+      where += ` AND activo = ${Number(activo)}`;
     }
 
     // Query principal
-    const query = `
+    const result = await sql.query(`
       SELECT
         id,
         nombre,
@@ -145,25 +142,16 @@ const listUsers = async (req, res) => {
       FROM Usuarios
       ${where}
       ORDER BY id
-      OFFSET @offset ROWS
-      FETCH NEXT @limit ROWS ONLY
-    `;
+      OFFSET ${offset} ROWS
+      FETCH NEXT ${Number(limit)} ROWS ONLY
+    `);
 
     // Total
-    const countQuery = `
-      SELECT COUNT(*) total
+    const totalResult = await sql.query(`
+      SELECT COUNT(*) AS total
       FROM Usuarios
       ${where}
-    `;
-
-    const request = sql.request();
-
-    params.forEach(p => request.input(p.name, p.value));
-    request.input('offset', offset);
-    request.input('limit', Number(limit));
-
-    const result = await request.query(query);
-    const totalResult = await request.query(countQuery);
+    `);
 
     res.json({
       page: Number(page),
@@ -173,15 +161,8 @@ const listUsers = async (req, res) => {
     });
 
   } catch (err) {
-    /* console.error(err);
-    res.status(500).json({ message: 'Error listando usuarios' }); */
-    console.error('❌ ERROR REAL listUsers =====>');
-    console.error(err);
-    console.error('❌ MESSAGE:', err.message);
-    console.error('❌ CODE:', err.code);
-    console.error('❌ STACK:', err.stack);
-
-    return res.status(500).json({
+    console.error('❌ ERROR listUsers:', err);
+    res.status(500).json({
       message: 'Error listando usuarios',
       error: err.message
     });

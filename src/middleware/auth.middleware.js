@@ -1,25 +1,53 @@
-// src/middleware/auth.middleware.js
-const jwt = require('jsonwebtoken');
+/* const jwt = require('jsonwebtoken');
 
-/**
- * Verifica el JWT (cookie o header Authorization) y adjunta el usuario a la request.
- */
 const authMiddleware = (req, res, next) => {
-  const bearer = req.headers.authorization;
-  const headerToken = bearer?.startsWith('Bearer ') ? bearer.slice(7) : null;
-  const cookieToken = req.cookies?.token;
-  const token = headerToken || cookieToken;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Authorization requerido' });
+  }
+
+  const token = authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ message: 'Token no proporcionado' });
+    return res.status(401).json({ message: 'Token inválido' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // decoded debe traer id, email y permisos
     req.user = decoded;
+
     next();
   } catch (err) {
-    console.error('Error verificando JWT:', err.message);
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+};
+
+module.exports = authMiddleware;
+
+ */
+
+const jwt = require('jsonwebtoken');
+
+const authMiddleware = (req, res, next) => {
+  // 1️⃣ Leer token desde cookie
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Authorization requerido' });
+  }
+
+  try {
+    // 2️⃣ Verificar token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // decoded: { id, email, permisos }
+    req.user = decoded;
+
+    next();
+  } catch (err) {
     return res.status(401).json({ message: 'Token inválido o expirado' });
   }
 };
